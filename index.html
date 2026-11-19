@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wind Monitor Dashboard - MQTT</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h2>WIND MONITOR DASHBOARD</h2>
+        <div class="sub" id="topicInfo">Topic: windmonitor/tnu18/telemetry</div>
+      </div>
+      <div id="mqttStatus" class="badge">MQTT: Connecting...</div>
+    </div>
+
+    <div class="grid">
+      <!-- Animasi Arah Angin (Kompas) -->
+      <div class="card">
+        <div class="sub">ARAH ANGIN</div>
+        <svg viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="66" fill="none" stroke="#475569" stroke-width="3" />
+          <text x="80" y="26" fill="#94a3b8" font-size="12" text-anchor="middle">N</text>
+          <text x="138" y="84" fill="#94a3b8" font-size="12" text-anchor="middle">E</text>
+          <text x="80" y="144" fill="#94a3b8" font-size="12" text-anchor="middle">S</text>
+          <text x="22" y="84" fill="#94a3b8" font-size="12" text-anchor="middle">W</text>
+          <g id="needle">
+            <polygon points="80,24 87,80 80,72 73,80" fill="#38bdf8" />
+            <polygon points="80,136 87,80 80,88 73,80" fill="#64748b" />
+            <circle cx="80" cy="80" r="5" fill="#f8fafc" />
+          </g>
+        </svg>
+        <div class="val-big"><span id="degVal">0</span>°</div>
+        <div class="sub" id="dirText">N (Utara)</div>
+      </div>
+
+      <!-- Animasi Kecepatan Angin (Rotor/Baling-baling) -->
+      <div class="card">
+        <div class="sub">KECEPATAN ANGIN</div>
+        <svg viewBox="0 0 160 160">
+          <line x1="80" y1="80" x2="80" y2="145" stroke="#64748b" stroke-width="5" />
+          <circle cx="80" cy="80" r="46" fill="none" stroke="#334155" stroke-dasharray="4 4" stroke-width="2" />
+          <g id="rotor">
+            <rect x="76" y="34" width="8" height="42" rx="4" fill="#4ade80" />
+            <rect x="76" y="84" width="8" height="42" rx="4" fill="#4ade80" transform="rotate(120 80 80)" />
+            <rect x="76" y="84" width="8" height="42" rx="4" fill="#4ade80" transform="rotate(240 80 80)" />
+            <circle cx="80" cy="80" r="8" fill="#f8fafc" />
+          </g>
+        </svg>
+        <div class="val-big"><span id="ktVal">0</span> <span class="unit">kt</span></div>
+        <div class="sub">Batas aman: &le; 25 kt</div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <div>Sensor Arah: <strong id="errArah">OK</strong></div>
+      <div>Sensor Kec: <strong id="errKec">OK</strong></div>
+      <div>Alarm: <strong id="alarmStatus">OFF</strong></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
