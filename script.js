@@ -5,6 +5,10 @@ const statusBadge = document.getElementById("mqttStatus");
 const needle = document.getElementById("needle");
 const rotor = document.getElementById("rotor");
 
+let targetDirDeg = 0;
+let currentDirDeg = 0;
+let hasReceivedDir = false;
+
 let currentSpeedKt = 0;
 let rotorAngle = 0;
 
@@ -24,19 +28,33 @@ function getCardinalLabel(deg) {
   return dirs[idx];
 }
 
-// Animasi rotasi baling-baling kecepatan angin
-let lastFrame = performance.now();
-function animateRotor(now) {
-  const dt = (now - lastFrame) / 1000;
-  lastFrame = now;
-  const degPerSec = currentSpeedKt * 18;
-  rotorAngle = (rotorAngle + degPerSec * dt) % 360;
-  if (rotor) {
-    rotor.style.transform = `rotate(${rotorAngle}deg)`;
-  }
-  requestAnimationFrame(animateRotor);
+// Hitung selisih sudut terpendek (-180..+180) agar tidak berputar penuh saat melewati 0°/360°
+function shortestAngleDelta(fromDeg, toDeg) {
+  return ((((toDeg - fromDeg) % 360) + 540) % 360) - 180;
 }
-requestAnimationFrame(animateRotor);
+
+// Animasi halus untuk jarum kompas & baling-baling kecepatan angin
+let lastFrame = performance.now();
+function animateDashboard(now) {
+  const dt = Math.min((now - lastFrame) / 1000, 0.1);
+  lastFrame = now;
+
+  if (needle && hasReceivedDir) {
+    const delta = shortestAngleDelta(currentDirDeg, targetDirDeg);
+    const smoothing = 1 - Math.exp(-16 * dt);
+    currentDirDeg += delta * smoothing;
+    needle.style.transform = `rotate(${currentDirDeg.toFixed(2)}deg)`;
+  }
+
+  if (rotor) {
+    const degPerSec = currentSpeedKt * 18;
+    rotorAngle = (rotorAngle + degPerSec * dt) % 360;
+    rotor.style.transform = `rotate(${rotorAngle.toFixed(2)}deg)`;
+  }
+
+  requestAnimationFrame(animateDashboard);
+}
+requestAnimationFrame(animateDashboard);
 
 // Koneksi ke MQTT Broker via WebSocket Secure (WSS)
 const client = mqtt.connect(BROKER_WSS, {
@@ -81,9 +99,14 @@ client.on("message", (topic, payload) => {
       : (data.mataAngin ?? getCardinalLabel(arah));
     document.getElementById("ktVal").textContent = errKec ? "ERR" : kec.toFixed(1);
 
-    if (needle) {
-      needle.style.transform = `rotate(${arah}deg)`;
+    if (!errArah) {
+      targetDirDeg = arah;
+      if (!hasReceivedDir) {
+        currentDirDeg = arah;
+        hasReceivedDir = true;
+      }
     }
+
     currentSpeedKt = errKec ? 0 : Math.max(0, kec);
 
     document.getElementById("errArah").textContent = errArah ? "ERR" : "OK";

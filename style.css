@@ -93,7 +93,6 @@ svg {
 #needle {
   transform-box: fill-box;
   transform-origin: center;
-  transition: transform 0.15s linear;
 }
 
 #rotor {
