@@ -96,8 +96,7 @@ svg {
 }
 
 #rotor {
-  transform-box: fill-box;
-  transform-origin: center;
+  transform-origin: 80px 80px;
 }
 
 .status-row {
