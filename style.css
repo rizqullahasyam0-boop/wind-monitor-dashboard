@@ -91,12 +91,14 @@ svg {
 }
 
 #needle {
-  transform-origin: 80px 80px;
+  transform-box: fill-box;
+  transform-origin: center;
   transition: transform 0.15s linear;
 }
 
 #rotor {
-  transform-origin: 80px 80px;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .status-row {
